@@ -2,6 +2,7 @@
 
 #include "cube.h" // cube_t & co.
 
+// rain is a scene.
 void                    rain(cube_t cube) {
   static char           loading = 1;
   static unsigned int   timer   = 0;

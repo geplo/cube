@@ -8,61 +8,28 @@
 #include "cube.h"   // Cube managment.
 #include "scenes.h" // Scenes.
 
-cube_t        cube;
-spi_handler   hdlr =
+// Cube state.
+cube_t cube;
+
+// Scene handler.
+void (*scene)(cube_t);
+
+// SPI handler config.
+spi_handler hdlr =
   {
-   .config = {
-	      .device = "/dev/spidev0.0", // Device to use.
-	      .mode   = 0,                // Default mode (MSBF, most significant bit first).
-	      .bits   = CUBE_SIZE,        // CUBE_SIZE bits per words.
-	      .speed  = 8000000,          // 8MHz
-	      .delay  = 5,                // 5 micro secs in between iterations.
-	      },
+   .config =
+   {
+    .device = "/dev/spidev0.0", // Device to use.
+    .mode   = 0,                // Default mode (MSBF, most significant bit first).
+    .bits   = CUBE_SIZE,        // CUBE_SIZE bits per words.
+    .speed  = 8000000,          // 8MHz
+    .delay  = 5,                // 5 micro secs in between iterations.
+   },
   };
 
-int renderCube(spi_handler hdlr, cube_t cube);
 
-int     setup() {
-  // Initialize SPI.
-  if (spi_setup(&hdlr) < 0) {
-    perror("error setting up SPI");
-    return 1;
-  }
-
-  // Seed the random generator.
-  srand(time(NULL));
-
-  // Clear the cube.
-  clearCube(cube);
-
-  return 0;
-}
-
-int     cleanup() {
-  int   ret;
-
-  // Cleanup SPI.
-  if ((ret = spi_cleanup(&hdlr)) < 0) {
-    perror("error cleaning up SPI");
-    return ret;
-  }
-
-  return 0;
-}
-
-int     loop() {
-  int   ret;
-
-  rain(cube);
-  if ((ret = renderCube(hdlr, cube)) < 0) {
-    return ret;
-  }
-
-  usleep(hdlr.config.delay);
-  return 0;
-}
-
-int             renderCube(spi_handler hdlr, cube_t cube) {
+// render_cube uses SPI to display the cube.
+int             render_cube(spi_handler hdlr, cube_t cube) {
   cube_size_t   tx[CUBE_SIZE + 1]; // 1 row of cathodes, CUBE_SIZE rows of anodes.
   int           ret;
 
@@ -81,9 +48,63 @@ int             renderCube(spi_handler hdlr, cube_t cube) {
     }
 
     // Send the data to the SPI.
-    if ((ret = transfer(hdlr, tx, NULL, sizeof(tx))) < 0) {
+    if ((ret = spi_transfer(&hdlr, tx, NULL, sizeof(tx))) < 0) {
       return ret;
     }
+  }
+
+  return 0;
+}
+
+// setup is called before the main loop.
+// Should return a negative value in case of error.
+int     setup() {
+  // Initialize SPI.
+  if (spi_setup(&hdlr) < 0) {
+    perror("error setting up SPI");
+    return 1;
+  }
+
+  // Seed the random generator.
+  srand(time(NULL));
+
+  // Clear the cube.
+  clearCube(cube);
+
+  // Set the scene to use.
+  scene = rain;
+  // scene = plane_shift;
+
+  return 0;
+}
+
+// loop is the main logic block, called by the main.
+// Should return a negative value in case of error.
+int     loop() {
+  int   ret;
+
+  // Step the scene.
+  scene(cube);
+
+  // Render it.
+  if ((ret = render_cube(hdlr, cube)) < 0) {
+    return ret;
+  }
+
+  // Delay and repeat.
+  usleep(hdlr.config.delay);
+  return 0;
+}
+
+// cleanup is callled when the main loop exits.
+// Should return a negative value in case of error.
+int     cleanup() {
+  int   ret;
+
+  // Cleanup SPI.
+  if ((ret = spi_cleanup(&hdlr)) < 0) {
+    perror("error cleaning up SPI");
+    return ret;
   }
 
   return 0;

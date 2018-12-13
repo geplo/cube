@@ -26,12 +26,12 @@ typedef struct {
 }               spi_config;
 
 typedef struct {
-    spi_config    config;
-    int           fd;
+    spi_config  config;
+    int         fd;
 }               spi_handler;
 
 int     spi_setup(spi_handler* hdlr);
 int     spi_cleanup(spi_handler* hdlr);
-int     transfer(spi_handler hdlr, uint8_t tx[], uint8_t rx[], uint64_t len);
+int     spi_transfer(spi_handler* hdlr, void* tx, void* rx, int len);
 
 #endif /* !__SPI_H__ */

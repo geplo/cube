@@ -1,30 +1,30 @@
-#include <stdint.h> // uint8_t & co.
-
 #include <fcntl.h>     // open(2).
 #include <unistd.h>    // close(3).
 #include <sys/ioctl.h> // ioctl(2).
 
-#include <linux/spi/spidev.h> // SPI structs & ioctls.
+#include <linux/spi/spidev.h> // spi_ioc_transfer & ioctls consts.
 
 #include "spi.h"
 
-int                             transfer(spi_handler hdlr, uint8_t tx[], uint8_t rx[], uint64_t len) {
+// spi_transfer uses SPI to send tx and receives in rx. tx and rx must be allocated with len size.
+int                             spi_transfer(spi_handler* hdlr, void* tx, void* rx, int len) {
   struct spi_ioc_transfer       tr =
     {
      .tx_buf        = (unsigned long)tx,
      .rx_buf        = (unsigned long)rx,
      .len           = len,
-     .delay_usecs   = hdlr.config.delay,
-     .speed_hz      = hdlr.config.speed,
-     .bits_per_word = hdlr.config.bits,
+     .speed_hz      = hdlr->config.speed,
+     .delay_usecs   = hdlr->config.delay,
+     .bits_per_word = hdlr->config.bits,
     };
 
-  if (ioctl(hdlr.fd, SPI_IOC_MESSAGE(1), &tr) < 1) {
+  if (ioctl(hdlr->fd, SPI_IOC_MESSAGE(1), &tr) < 1) {
     return -1;
   }
   return 0;
 }
 
+// spi_setup initializes the SPI with the hdlr->config values.
 int     spi_setup(spi_handler* hdlr) {
   int   ret;
 
@@ -64,6 +64,7 @@ int     spi_setup(spi_handler* hdlr) {
   return 0;
 }
 
+// spi_cleanup closes down the SPI.
 int     spi_cleanup(spi_handler* hdlr) {
   int   ret;
 
