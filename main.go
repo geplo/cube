@@ -1,8 +1,9 @@
 package main
 
 import (
-	"test/testcube2/cube888"
 	"time"
+
+	"github.com/geplo/cube/cube888"
 
 	"gobot.io/x/gobot"
 	"gobot.io/x/gobot/drivers/spi"
