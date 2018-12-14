@@ -1,12 +1,12 @@
-#define _BSD_SOURCE // For usleep(3) (fix warning on linux).
-#include <unistd.h> // usleep(3).
-#include <time.h>   // time(2) (for random seed).
-#include <stdio.h>  // perror(3), printf(3) & co.
-#include <stdlib.h> // srand(3).
+#define _DEFAULT_SOURCE // For usleep(3) (fix warning on linux).
+#include <unistd.h>     // usleep(3).
+#include <time.h>       // time(2) (for random seed).
+#include <stdio.h>      // perror(3), printf(3) & co.
+#include <stdlib.h>     // srand(3).
 
-#include "spi.h"    // SPI lib.
-#include "cube.h"   // Cube managment.
-#include "scenes.h" // Scenes.
+#include "spi.h"        // SPI lib.
+#include "cube.h"       // Cube managment.
+#include "scenes.h"     // Scenes.
 
 // Cube state.
 cube_t cube;
@@ -17,14 +17,14 @@ void (*scene)(cube_t);
 // SPI handler config.
 spi_handler hdlr =
   {
-   .config =
-   {
-    .device = "/dev/spidev0.0", // Device to use.
-    .mode   = 0,                // Default mode (MSBF, most significant bit first).
-    .bits   = CUBE_SIZE,        // CUBE_SIZE bits per words.
-    .speed  = 8000000,          // 8MHz
-    .delay  = 5,                // 5 micro secs in between iterations.
-   },
+    .config =
+    {
+      .device = "/dev/spidev0.0", // Device to use.
+      .mode   = 0,                // Default mode.
+      .bits   = 8,                // 8 bits per words.
+      .speed  = 8000000,          // 8MHz
+      .delay  = 5,                // 5 micro secs in between iterations.
+    },
   };
 
 
@@ -78,10 +78,22 @@ int     setup() {
   return 0;
 }
 
+void dumpCube() {
+  for (unsigned int i = 0; i < CUBE_SIZE; i++) {
+    for (unsigned int j = 0; j < CUBE_SIZE; j++) {
+      printf("0x%02X ", cube[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+}
+
 // loop is the main logic block, called by the main.
 // Should return a negative value in case of error.
 int     loop() {
   int   ret;
+
+  //  dumpCube();
 
   // Step the scene.
   scene(cube);

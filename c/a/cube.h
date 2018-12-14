@@ -3,7 +3,7 @@
 
 // Define the cube as 8x8x8, one color.
 typedef unsigned char cube_size_t;                  // 8 bits per element.
-#define CUBE_SIZE     sizeof(cube_size_t)
+#define CUBE_SIZE     (sizeof(cube_size_t) * 8)
 typedef cube_size_t   cube_t[CUBE_SIZE][CUBE_SIZE]; // 2d array so we have x*y*z.
 
 // Enum for shift direction.
