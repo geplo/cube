@@ -15,17 +15,15 @@ cube_t cube;
 void (*scene)(cube_t);
 
 // SPI handler config.
-spi_handler hdlr =
-  {
-    .config =
-    {
-      .device = "/dev/spidev0.0", // Device to use.
-      .mode   = 0,                // Default mode.
-      .bits   = 8,                // 8 bits per words.
-      .speed  = 8000000,          // 8MHz
-      .delay  = 5,                // 5 micro secs in between iterations.
-    },
-  };
+spi_handler hdlr = {
+  .config =  {
+    .device = "/dev/spidev0.0", // Device to use.
+    .mode   = 0,                // Default mode.
+    .bits   = 8,                // 8 bits per words.
+    .speed  = 8000000,          // 8MHz
+    .delay  = 5,                // 5 micro secs in between iterations.
+  },
+};
 
 
 // render_cube uses SPI to display the cube.
@@ -78,22 +76,10 @@ int     setup() {
   return 0;
 }
 
-void dumpCube() {
-  for (unsigned int i = 0; i < CUBE_SIZE; i++) {
-    for (unsigned int j = 0; j < CUBE_SIZE; j++) {
-      printf("0x%02X ", cube[i][j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
-}
-
 // loop is the main logic block, called by the main.
 // Should return a negative value in case of error.
 int     loop() {
   int   ret;
-
-  //  dumpCube();
 
   // Step the scene.
   scene(cube);

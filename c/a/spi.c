@@ -8,20 +8,16 @@
 
 // spi_transfer uses SPI to send tx and receives in rx. tx and rx must be allocated with len size.
 int                             spi_transfer(spi_handler* hdlr, void* tx, void* rx, int len) {
-  struct spi_ioc_transfer       tr =
-    {
-     .tx_buf        = (unsigned long)tx,
-     .rx_buf        = (unsigned long)rx,
-     .len           = len,
-     .speed_hz      = hdlr->config.speed,
-     .delay_usecs   = hdlr->config.delay,
-     .bits_per_word = hdlr->config.bits,
-    };
+  struct spi_ioc_transfer       tr = {
+    .tx_buf        = (unsigned long)tx,
+    .rx_buf        = (unsigned long)rx,
+    .len           = len,
+    .speed_hz      = hdlr->config.speed,
+    .delay_usecs   = hdlr->config.delay,
+    .bits_per_word = hdlr->config.bits,
+  };
 
-  if (ioctl(hdlr->fd, SPI_IOC_MESSAGE(1), &tr) < 1) {
-    return -1;
-  }
-  return 0;
+  return ioctl(hdlr->fd, SPI_IOC_MESSAGE(1), &tr);
 }
 
 // spi_setup initializes the SPI with the hdlr->config values.
