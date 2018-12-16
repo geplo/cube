@@ -56,9 +56,9 @@ void                    plane_shift(cube_t cube) {
 
   // If we are loading, initialize the scenario.
   if (loading) {
-    plane = new_plane();                        // Create a new plane.
-    clearCube(cube);                            // Make sure to have a clean slate.
-    setPlane(cube, plane.axis, plane.position); // Populate the cube with the new plane.
+    plane = new_plane();                         // Create a new plane.
+    clear_cube(cube);                            // Make sure to have a clean slate.
+    set_plane(cube, plane.axis, plane.position); // Populate the cube with the new plane.
 
     // Reset flags.
     timer   = 0;

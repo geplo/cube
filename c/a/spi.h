@@ -8,11 +8,11 @@
 
    spi_handler   hdlr = {
      .config = {
-       .device = "/dev/spidev0.0",
-       .mode   = 0,
-       .bits   = 8,
-       .speed  = 8000000,
-       .delay  = 5,
+       .device = "/dev/spidev0.0", // CEO0.
+       .mode   = 0,                // SPI_MODE_0.
+       .bits   = 8,                // 8 bits per words.
+       .speed  = 8000000,          // 8 MHz.
+       .delay  = 5,                // 5 usec delay.
      },
    };
 */
@@ -32,6 +32,6 @@ typedef struct {
 
 int     spi_setup(spi_handler* hdlr);
 int     spi_cleanup(spi_handler* hdlr);
-int     spi_transfer(spi_handler* hdlr, void* tx, void* rx, int len);
+int     spi_transfer(const spi_handler* hdlr, const void* tx, void* rx, int len);
 
 #endif /* !__SPI_H__ */

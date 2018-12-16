@@ -5,7 +5,8 @@ SRCS    = main.c \
           spi.c \
           cube.c \
           scene_planeshift.c \
-          scene_rain.c
+          scene_rain.c \
+          scene_manual.c
 HEADERS = cube.h \
           spi.h \
           scenes.h
@@ -22,6 +23,7 @@ LDFLAGS =
 cube.c:             cube.h
 scene_planeshift.c: cube.h
 scene_rain.c:       cube.h
+scene_manual.c:     cube.h
 spi.c:              spi.h
 loop.c:             cube.h spi.h scenes.h
 scenes.h:           cube.h

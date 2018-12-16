@@ -27,9 +27,9 @@ void                    rain(cube_t cube) {
   timer = 0;              // Reset the "timer".
   shift(cube, shiftNegY); // Shift layers down.
 
-  // From 0 to CUBE_SIZE / 2 + 1 drops per layer.
-  for (unsigned int i = 0; i < rand() % (CUBE_SIZE / 2 + 1); i++) {
-    setVoxel(cube,
+  // From 0 to CUBE_SIZE (i.e. sqrt of surface) drops per layer.
+  for (unsigned int i = 0; i < rand() % CUBE_SIZE; i++) {
+    set_voxel(cube,
 	     rand() % CUBE_SIZE,  // Random X.
 	     CUBE_SIZE - 1,       // Always top layer for Y.
 	     rand() % CUBE_SIZE); // Random Z.

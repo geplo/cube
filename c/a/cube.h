@@ -23,9 +23,9 @@ typedef enum {
               axisZ,
 } axis_t;
 
-void setVoxel(cube_t cube, int x, int y, int z);
-void clearCube(cube_t cube);
+void set_voxel(cube_t cube, int x, int y, int z);
+void clear_cube(cube_t cube);
 void shift(cube_t cube, shift_dir_t dir);
-void setPlane(cube_t cube, axis_t axis, int i);
+void set_plane(cube_t cube, axis_t axis, int i);
 
 #endif /* !__CUBE_H__ */

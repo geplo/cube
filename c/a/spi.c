@@ -7,7 +7,7 @@
 #include "spi.h"
 
 // spi_transfer uses SPI to send tx and receives in rx. tx and rx must be allocated with len size.
-int                             spi_transfer(spi_handler* hdlr, void* tx, void* rx, int len) {
+int                             spi_transfer(const spi_handler* hdlr, const void* tx, void* rx, int len) {
   struct spi_ioc_transfer       tr = {
     .tx_buf        = (unsigned long)tx,
     .rx_buf        = (unsigned long)rx,

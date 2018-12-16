@@ -1,12 +1,14 @@
 #include "cube.h" // cube_t, & co.
 
-// setVoxel tuerns on the x*y*z LED.
-void setVoxel(cube_t cube, int x, int y, int z) {
+#include <stdio.h>
+
+// set_voxel tuerns on the x*y*z LED.
+void set_voxel(cube_t cube, int x, int y, int z) {
   cube[CUBE_SIZE - 1 - y][CUBE_SIZE - 1 - z] |= (0x01 << x);
 }
 
-// clearCube turns off the whole cube.
-void clearCube(cube_t cube) {
+// clear_cube turns off the whole cube.
+void clear_cube(cube_t cube) {
   for (unsigned int i = 0; i < CUBE_SIZE; i++) {
     for (unsigned int j = 0; j < CUBE_SIZE; j++) {
       cube[i][j] = 0x00;
@@ -76,19 +78,19 @@ void shift(cube_t cube, shift_dir_t dir) {
   }
 }
 
-// setPlane turns on the Nth plane from the given axis.
-void setPlane(cube_t cube, axis_t axis, int n) {
+// set_plane turns on the Nth plane from the given axis.
+void set_plane(cube_t cube, axis_t axis, int n) {
   for (unsigned int j = 0; j < CUBE_SIZE; j++) {
     for (unsigned int k = 0; k < CUBE_SIZE; k++) {
       switch (axis) {
       case axisX:
-        setVoxel(cube, n, j, k);
+        set_voxel(cube, n, j, k);
         break;
       case axisY:
-        setVoxel(cube, j, n, k);
+        set_voxel(cube, j, n, k);
         break;
       case axisZ:
-        setVoxel(cube, j, k, n);
+        set_voxel(cube, j, k, n);
         break;
       }
     }

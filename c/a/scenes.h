@@ -3,7 +3,8 @@
 
 # include "cube.h" // cube_t.
 
-void plane_shift(cube_t cube);
-void rain(cube_t cube);
+void plane_shift(cube_t);
+void rain(cube_t);
+void manual(cube_t);
 
 #endif /* !__SCENES_H__ */
