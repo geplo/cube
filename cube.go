@@ -4,15 +4,10 @@ type Element byte
 
 // Cube is the in-memory representation of the c.
 type Cube struct {
-	state [][]Element
+	state [][]Element // Actual state.
 	XLen  int
 	YLen  int
 	ZLen  int
-}
-
-// X return the X line as an Element from the x/y perspective.
-func (c Cube) X(y, z int) Element {
-	return c.state[y][z]
 }
 
 // New instantiate a simple cube of the given size.

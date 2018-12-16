@@ -1,43 +1,36 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"time"
 
-	"github.com/geplo/cube"
-	"github.com/geplo/cube/scenes/planeshift"
 	"github.com/pkg/errors"
+
+	"github.com/geplo/cube"
+	"github.com/geplo/cube/scenes"
+	"github.com/geplo/cube/scenes/planeshift"
+	"github.com/geplo/cube/scenes/rain"
 
 	"gobot.io/x/gobot"
 	"gobot.io/x/gobot/drivers/spi"
-	"gobot.io/x/gobot/platforms/raspi"
 )
 
 var (
-	adaptor    gobot.Connection
 	spiHandler spi.Connection
 	c          cube.Cube
-	mappedCube cube.Cube
-	// scene      interface{ Step(cube.Cube) time.Duration }
-	scene func(cube.Cube)
+	scene      scenes.Scene
+	next       time.Time
 )
 
 // setup is called before the main loop.
 func setup() error {
 	// Instantiate the cube.
 	c = cube.New(8)
-	// Pre-alloc the hardware mapped cube.
-	mappedCube = cube.New(8)
-
-	// Use a raspberry pi.
-	a := raspi.NewAdaptor()
 
 	// Initialize SPI.
-	hdlr, err := a.GetSpiConnection(
-		0,   // Bus 0.
-		0,   // CEO0.
+	hdlr, err := spi.GetSpiConnection(
+		0, 0, // Bus 0, CEO0, i.e. /dev/spidev0.0.
 		0,   // SPI_MODE_0.
 		8,   // 8 bits per words.
 		8e6, // 8MHz.
@@ -45,40 +38,31 @@ func setup() error {
 	if err != nil {
 		return errors.Wrap(err, "GetSpiConnection")
 	}
-	adaptor = a
 	spiHandler = hdlr
 
 	// Seed the random generator.
 	rand.Seed(time.Now().UnixNano())
 
 	// Set the scene to use.
-	scene = planeshift.Scene
+	scene = planeshift.New()
+	scene = rain.New()
+
 	return nil
 }
-
-var cc = 0
-
-var next time.Time
 
 func loop() error {
 	start := time.Now()
 
-	// if next.Before(start) {
-	// Step the scene.
-	scene(c)
+	if next.Before(start) {
+		// Step the scene.
+		next = start.Add(scene.Step(c))
+	}
 
-	// Render it.
-	if err := renderCube(spiHandler, c, mappedCube); err != nil {
+	// Render the cube.
+	if err := renderCube(spiHandler, c); err != nil {
 		return errors.Wrap(err, "renderCube")
 	}
-	// }
 
-	if cc%200 == 0 {
-		fmt.Printf("%s\n", time.Since(start))
-	}
-	cc++
-
-	//time.Sleep(time.Until(next))
 	// Repeat.
 	return nil
 }
@@ -92,9 +76,9 @@ var (
 	zMap = [][]int{{1, 0, 3, 2, 5, 4, 7, 6}, {1, 0, 3, 2, 5, 4, 7, 6}, {1, 0, 3, 2, 5, 4, 7, 6}, {1, 0, 3, 2, 5, 4, 7, 6}, {1, 0, 3, 2, 5, 4, 7, 6}, {1, 0, 3, 2, 5, 4, 7, 6}, {1, 0, 3, 2, 5, 4, 7, 6}, {1, 0, 3, 2, 5, 4, 7, 6}}
 )
 
-func mapCube(src, dst cube.Cube) cube.Cube {
+func mapCube(src cube.Cube) cube.Cube {
 	// Make sure the dst is empty.
-	dst.Clear()
+	dst := cube.NewCustom(src.XLen, src.YLen, src.ZLen)
 
 	// For each point of the cube, map x/y/z to match the defined hardware wiring.
 	for x := 0; x < dst.XLen; x++ {
@@ -109,14 +93,17 @@ func mapCube(src, dst cube.Cube) cube.Cube {
 	return dst
 }
 
-func renderCube(spiHandler spi.Connection, c, mappedCube cube.Cube) error {
-	c = mapCube(c, mappedCube)
+func renderCube(spiHandler spi.Connection, c cube.Cube) error {
+	c = mapCube(c)
 
 	// We send one plane at a time to SPI. 1 cathode, ZLen anones.
 	// TODO: Handle XLen > 8.
 	tx := make([]byte, 1+c.ZLen)
+
+	// The first "word" is the cathode layer, which is the Y axis.
 	for y := 0; y < c.YLen; y++ {
 		tx[0] = 0x01 << uint(y)
+
 		for z := 0; z < c.ZLen; z++ {
 			tx[z+1] = 0
 			for x := 0; x < c.XLen; x++ {
@@ -147,7 +134,6 @@ func main() {
 	}
 
 	robot := gobot.NewRobot("spicube",
-		[]gobot.Connection{adaptor},
 		work,
 	)
 
