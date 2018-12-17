@@ -11,11 +11,7 @@ type Cube struct {
 }
 
 // New instantiate a simple cube of the given size.
-// Max size is 64.
 func New(size int) Cube {
-	if size > 64 {
-		panic("max size for cube is 64")
-	}
 	state := make([][]Element, size)
 	for i := 0; i < size; i++ {
 		state[i] = make([]Element, size)
@@ -29,11 +25,7 @@ func New(size int) Cube {
 }
 
 // NewCustom instantiate a rectangular prism.
-// xLen max is 64.
 func NewCustom(xLen, yLen, zLen int) Cube {
-	if xLen > 64 {
-		panic("max size for zLen is 64")
-	}
 	state := make([][]Element, yLen)
 	for i := 0; i < yLen; i++ {
 		state[i] = make([]Element, zLen)
@@ -77,52 +69,52 @@ const (
 func (c Cube) Shift(dir Direction) {
 	switch dir {
 	case PosX:
-		for y := 0; y < 8; y++ {
-			for z := 0; z < 8; z++ {
-				c.state[y][z] = c.state[y][z] << 1
+		for y := 0; y < c.YLen; y++ {
+			for z := 0; z < c.ZLen; z++ {
+				c.state[y][z] <<= 1
 			}
 		}
 	case NegX:
-		for y := 0; y < 8; y++ {
-			for z := 0; z < 8; z++ {
-				c.state[y][z] = c.state[y][z] >> 1
+		for y := 0; y < c.YLen; y++ {
+			for z := 0; z < c.ZLen; z++ {
+				c.state[y][z] >>= 1
 			}
 		}
 	case PosY:
-		for y := 1; y < 8; y++ {
-			for z := 0; z < 8; z++ {
+		for y := 1; y < c.YLen; y++ {
+			for z := 0; z < c.ZLen; z++ {
 				c.state[y-1][z] = c.state[y][z]
 			}
 		}
-		for i := 0; i < 8; i++ {
-			c.state[7][i] = 0
+		for i := 0; i < c.ZLen; i++ {
+			c.state[c.YLen-1][i] = 0
 		}
 	case NegY:
-		for y := 7; y > 0; y-- {
-			for z := 0; z < 8; z++ {
+		for y := c.YLen - 1; y > 0; y-- {
+			for z := 0; z < c.ZLen; z++ {
 				c.state[y][z] = c.state[y-1][z]
 			}
 		}
-		for i := 0; i < 8; i++ {
+		for i := 0; i < c.ZLen; i++ {
 			c.state[0][i] = 0
 		}
 	case PosZ:
-		for y := 0; y < 8; y++ {
-			for z := 1; z < 8; z++ {
+		for y := 0; y < c.YLen; y++ {
+			for z := 1; z < c.ZLen; z++ {
 				c.state[y][z-1] = c.state[y][z]
 			}
 		}
-		for i := 0; i < 8; i++ {
-			c.state[i][7] = 0
+		for i := 0; i < c.YLen; i++ {
+			c.state[i][c.ZLen-1] = 0
 		}
 	case NegZ:
-		for y := 0; y < 8; y++ {
-			for z := 7; z > 0; z-- {
+		for y := 0; y < c.YLen; y++ {
+			for z := c.ZLen - 1; z > 0; z-- {
 				c.state[y][z] = c.state[y][z-1]
 			}
 		}
-		for i := 0; i < 8; i++ {
-			c.state[i][0] = 0
+		for i := 0; i < c.YLen; i++ {
+			c.state[c.YLen][0] = 0
 		}
 	default:
 		panic("invalid direction")

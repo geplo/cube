@@ -2,53 +2,15 @@ package main
 
 import (
 	"log"
-	"math/rand"
 	"time"
 
 	"github.com/pkg/errors"
 
 	"github.com/geplo/cube"
-	"github.com/geplo/cube/scenes"
-	"github.com/geplo/cube/scenes/planeshift"
-	"github.com/geplo/cube/scenes/rain"
 
 	"gobot.io/x/gobot"
 	"gobot.io/x/gobot/drivers/spi"
 )
-
-var (
-	spiHandler spi.Connection
-	c          cube.Cube
-	scene      scenes.Scene
-	next       time.Time
-)
-
-// setup is called before the main loop.
-func setup() error {
-	// Instantiate the cube.
-	c = cube.New(8)
-
-	// Initialize SPI.
-	hdlr, err := spi.GetSpiConnection(
-		0, 0, // Bus 0, CEO0, i.e. /dev/spidev0.0.
-		0,   // SPI_MODE_0.
-		8,   // 8 bits per words.
-		8e6, // 8MHz.
-	)
-	if err != nil {
-		return errors.Wrap(err, "GetSpiConnection")
-	}
-	spiHandler = hdlr
-
-	// Seed the random generator.
-	rand.Seed(time.Now().UnixNano())
-
-	// Set the scene to use.
-	scene = planeshift.New()
-	scene = rain.New()
-
-	return nil
-}
 
 func loop() error {
 	start := time.Now()
@@ -121,9 +83,16 @@ func renderCube(spiHandler spi.Connection, c cube.Cube) error {
 }
 
 func main() {
-	if err := setup(); err != nil {
-		log.Fatalf("setup error: %s\n\n%+v\n", errors.Cause(err), err)
-	}
+	adc := cube.NewDriver(
+		cube.WithXMap(xMap),
+		cube.WithYMap(yMap),
+		cube.WithZMap(zMap),
+	// spi.WithBus(0),
+	// spi.WithChip(0),
+	// spi.WithMode(0),
+	// spi.WithBits(8),
+	// spi.WithSpeed(8e6),
+	)
 
 	work := func() {
 		gobot.Every(5*time.Microsecond, func() {
@@ -132,9 +101,9 @@ func main() {
 			}
 		})
 	}
-
 	robot := gobot.NewRobot("spicube",
 		work,
+		[]gobot.Device{adc},
 	)
 
 	if err := robot.Start(); err != nil {
