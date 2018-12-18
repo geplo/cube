@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/geplo/cube"
+	"github.com/geplo/cube/scenes"
 )
 
 type Scene struct {
 	loading bool
 }
 
-func New() *Scene {
+func New() scenes.Scene {
 	return &Scene{
 		loading: true,
 	}

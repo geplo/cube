@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/geplo/cube"
+	"github.com/geplo/cube/scenes"
 )
 
 type Scene struct {
@@ -14,7 +15,7 @@ type Scene struct {
 	planePosition  int
 }
 
-func New() *Scene {
+func New() scenes.Scene {
 	return &Scene{loading: true}
 }
 
