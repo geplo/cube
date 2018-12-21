@@ -8,16 +8,19 @@ import (
 	"github.com/geplo/cube/scenes"
 )
 
+// Scene holds the state.
 type Scene struct {
 	loading bool
 }
 
+// New instantiate a new scene.
 func New() scenes.Scene {
 	return &Scene{
 		loading: true,
 	}
 }
 
+// Step implements the scenes.Scene interface.
 func (s *Scene) Step(c cube.Cube) time.Duration {
 	if s.loading {
 		c.Clear()

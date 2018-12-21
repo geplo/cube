@@ -8,18 +8,20 @@ import (
 	"github.com/geplo/cube/scenes"
 )
 
+// Scene holds the state.
 type Scene struct {
 	looped         bool
 	loading        bool
-	planeDirection cube.Direction
+	planeDirection cube.AxisVector
 	planePosition  int
 }
 
+// New instantiate a new scene.
 func New() scenes.Scene {
 	return &Scene{loading: true}
 }
 
-// Scene describes the plane shift scene.
+// Step implements the scenes.Scene interface.
 func (s *Scene) Step(c cube.Cube) time.Duration {
 	if s.loading {
 		c.Clear()
@@ -51,13 +53,13 @@ func (s *Scene) Step(c cube.Cube) time.Duration {
 	}
 
 	c.Shift(s.planeDirection)
-	if s.planeDirection%2 == 0 {
+	if s.planeDirection.Direction == cube.Pos {
 		s.planePosition++
 		if s.planePosition == 7 {
 			if s.looped {
 				s.loading = true
 			} else {
-				s.planeDirection++
+				s.planeDirection.Direction = cube.Neg
 				s.looped = true
 			}
 		}
@@ -67,7 +69,7 @@ func (s *Scene) Step(c cube.Cube) time.Duration {
 			if s.looped {
 				s.loading = true
 			} else {
-				s.planeDirection--
+				s.planeDirection.Direction = cube.Pos
 				s.looped = true
 			}
 		}

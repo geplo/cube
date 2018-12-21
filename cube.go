@@ -1,5 +1,6 @@
 package cube
 
+// Element represent the X axis. Z and Y are from the 2d array state.
 type Element byte
 
 // Cube is the in-memory representation of the c.
@@ -38,14 +39,17 @@ func NewCustom(xLen, yLen, zLen int) Cube {
 	}
 }
 
+// SetVoxel turns on the given point in the cube.
 func (c Cube) SetVoxel(x, y, z int) {
 	c.state[c.YLen-1-y][c.ZLen-1-z] |= 0x01 << uint(x)
 }
 
+// GetVoxel returns the value of the requested point in the cube.
 func (c Cube) GetVoxel(x, y, z int) bool {
 	return (c.state[c.YLen-1-y][c.ZLen-1-z] & (0x01 << uint(x))) == (0x01 << uint(x))
 }
 
+// Clear turns off the whole cube,
 func (c Cube) Clear() {
 	for y, line := range c.state {
 		for z := range line {
@@ -54,19 +58,61 @@ func (c Cube) Clear() {
 	}
 }
 
-// Direction .
-type Direction int
+// Axis enum type.
+type Axis int
 
+// Axis enum values.
 const (
-	PosX Direction = iota
-	NegX
-	PosY
-	NegY
-	PosZ
-	NegZ
+	AxisX Axis = iota
+	AxisY
+	AxisZ
 )
 
-func (c Cube) Shift(dir Direction) {
+// SetPlane turns on the Nth plane following then given axis.
+func (c Cube) SetPlane(axis Axis, n int) {
+	for j := 0; j < 8; j++ {
+		for k := 0; k < 8; k++ {
+			switch axis {
+			case AxisX:
+				c.SetVoxel(n, j, k)
+			case AxisY:
+				c.SetVoxel(j, n, k)
+			case AxisZ:
+				c.SetVoxel(j, k, n)
+			default:
+				panic("invalid axis")
+			}
+		}
+	}
+}
+
+// Direction enum type.
+type Direction bool
+
+// Direction enum values.
+const (
+	Pos Direction = true
+	Neg Direction = false
+)
+
+// AxisVector represent an axis with a direction.
+type AxisVector struct {
+	Axis
+	Direction
+}
+
+// AxisVector enum values.
+var (
+	PosX = AxisVector{AxisX, Pos}
+	NegX = AxisVector{AxisX, Neg}
+	PosY = AxisVector{AxisY, Pos}
+	NegY = AxisVector{AxisY, Neg}
+	PosZ = AxisVector{AxisZ, Pos}
+	NegZ = AxisVector{AxisZ, Neg}
+)
+
+// Shift translates the cube following the given direction.
+func (c Cube) Shift(dir AxisVector) {
 	switch dir {
 	case PosX:
 		for y := 0; y < c.YLen; y++ {
@@ -118,30 +164,5 @@ func (c Cube) Shift(dir Direction) {
 		}
 	default:
 		panic("invalid direction")
-	}
-}
-
-type Axis int
-
-const (
-	AxisX Axis = iota
-	AxisY
-	AxisZ
-)
-
-func (c Cube) SetPlane(axis Axis, i int) {
-	for j := 0; j < 8; j++ {
-		for k := 0; k < 8; k++ {
-			switch axis {
-			case AxisX:
-				c.SetVoxel(i, j, k)
-			case AxisY:
-				c.SetVoxel(j, i, k)
-			case AxisZ:
-				c.SetVoxel(j, k, i)
-			default:
-				panic("invalid axis")
-			}
-		}
 	}
 }
